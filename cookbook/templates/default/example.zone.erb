@@ -1,0 +1,21 @@
+$ORIGIN example.com.
+$TTL 1
+@           SOA  ns0.example.com. hostmaster.example.com. (
+                 1        ; serial
+                 15M      ; refresh
+                 10M      ; retry
+                 1H       ; expiry
+                 15M      ; minimum
+);
+
+@           NS   ns0.example.com.
+@           NS   ns1.example.com.
+@           MX   10 mail-0.example.com.
+@           MX   20 mail-1.example.com.
+@           A    10.255.0.3
+
+ns0         A    192.168.50.5
+ns1         A    192.168.50.6
+
+mail-0       A    10.255.0.1
+mail-1       A    10.254.0.1

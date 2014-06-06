@@ -1,0 +1,23 @@
+// Managed by Chef, Bork Off.
+// Bind9 Test Master Configuration
+
+options {
+  directory "/var/lib/bind";
+  masterfile-format text;
+  dnssec-validation auto;
+  auth-nxdomain no;    # conform to RFC1035
+  listen-on-v6 { none; };
+
+  ixfr-from-differences yes;
+  provide-ixfr yes;
+
+  allow-transfer { any; };
+  allow-recursion { none; };
+  notify explicit;
+  also-notify { 192.168.50.6; };
+};
+
+zone "example.com" {
+  type master;
+  file "/var/lib/bind/example.com.db";
+};

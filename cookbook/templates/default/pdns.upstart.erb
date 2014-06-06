@@ -1,0 +1,12 @@
+start on runlevel [2345]
+stop on runlevel [016]
+
+respawn
+respawn limit 10 5
+console log
+
+exec <%= node["pdns"]["bin"] %> --daemon=no --guardian=no --config-dir=/etc/powerdns --loglevel=5
+
+pre-stop script
+  pdns_control quit
+end script

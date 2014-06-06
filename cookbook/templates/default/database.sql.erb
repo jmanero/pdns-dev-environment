@@ -1,0 +1,114 @@
+CREATE DATABASE IF NOT EXISTS pdns;
+GRANT ALL PRIVILEGES ON pdns.* TO 'pdns'@'localhost' IDENTIFIED BY 'some_pass';
+
+use pdns;
+
+CREATE TABLE IF NOT EXISTS domains (
+  id                    INT AUTO_INCREMENT,
+  name                  VARCHAR(255) NOT NULL,
+  master                VARCHAR(128) DEFAULT NULL,
+  last_check            INT DEFAULT NULL,
+  type                  VARCHAR(6) NOT NULL,
+  notified_serial       INT DEFAULT NULL,
+  account               VARCHAR(40) DEFAULT NULL,
+  PRIMARY KEY (id)
+) Engine=InnoDB;
+
+CREATE UNIQUE INDEX domain_name ON domains(name);
+
+CREATE TABLE IF NOT EXISTS records (
+  id                    INT AUTO_INCREMENT,
+  domain_id             INT DEFAULT NULL,
+  name                  VARCHAR(255) DEFAULT NULL,
+  type                  VARCHAR(10) DEFAULT NULL,
+  content               VARCHAR(64000) DEFAULT NULL,
+  ttl                   INT DEFAULT NULL,
+  prio                  INT DEFAULT NULL,
+  change_date           INT DEFAULT NULL,
+  disabled              TINYINT(1) DEFAULT 0,
+  ordername             VARCHAR(255) BINARY DEFAULT NULL,
+  auth                  TINYINT(1) DEFAULT 1,
+  PRIMARY KEY (id)
+) Engine=InnoDB;
+
+CREATE INDEX record_name_type ON records(name,type);
+CREATE INDEX record_domain_id ON records(domain_id);
+CREATE INDEX record_order ON records (domain_id, ordername);
+
+CREATE TABLE IF NOT EXISTS updates (
+  id                    INT AUTO_INCREMENT,
+  action                ENUM('ADD', 'DEL'),
+  serial                INT DEFAULT 0,
+  merged                BIT(1) DEFAULT 0,
+  domain_id             INT DEFAULT NULL,
+  name                  VARCHAR(255) DEFAULT NULL,
+  type                  VARCHAR(10) DEFAULT NULL,
+  content               VARCHAR(64000) DEFAULT NULL,
+  ttl                   INT DEFAULT NULL,
+  prio                  INT DEFAULT NULL,
+  change_date           INT DEFAULT NULL,
+  disabled              TINYINT(1) DEFAULT 0,
+  ordername             VARCHAR(255) BINARY DEFAULT NULL,
+  auth                  TINYINT(1) DEFAULT 1,
+  PRIMARY KEY (id)
+) Engine=InnoDB;
+
+CREATE INDEX update_domain_id ON updates(domain_id);
+CREATE INDEX update_serial ON updates(serial);
+CREATE INDEX update_merged ON updates(merged);
+
+CREATE TABLE IF NOT EXISTS supermasters (
+  ip                    VARCHAR(64) NOT NULL,
+  nameserver            VARCHAR(255) NOT NULL,
+  account               VARCHAR(40) DEFAULT NULL,
+  PRIMARY KEY (ip, nameserver)
+) Engine=InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS comments (
+  id                    INT AUTO_INCREMENT,
+  domain_id             INT NOT NULL,
+  name                  VARCHAR(255) NOT NULL,
+  type                  VARCHAR(10) NOT NULL,
+  modified_at           INT NOT NULL,
+  account               VARCHAR(40) NOT NULL,
+  comment               VARCHAR(64000) NOT NULL,
+  PRIMARY KEY (id)
+) Engine=InnoDB;
+
+CREATE INDEX comment_domain_id ON comments(domain_id);
+CREATE INDEX comment_name_type ON comments(name, type);
+CREATE INDEX comment_modified ON comments(domain_id, modified_at);
+
+CREATE TABLE IF NOT EXISTS domainmetadata (
+  id                    INT AUTO_INCREMENT,
+  domain_id             INT NOT NULL,
+  kind                  VARCHAR(16),
+  content               TEXT,
+  PRIMARY KEY (id)
+) Engine=InnoDB;
+
+CREATE INDEX metadata_domain_id ON domainmetadata(domain_id);
+
+CREATE TABLE IF NOT EXISTS cryptokeys (
+  id                    INT AUTO_INCREMENT,
+  domain_id             INT NOT NULL,
+  flags                 INT NOT NULL,
+  active                BOOL,
+  content               TEXT,
+  PRIMARY KEY(id)
+) Engine=InnoDB;
+
+CREATE INDEX cryptokey_domain_id ON cryptokeys(domain_id);
+
+CREATE TABLE IF NOT EXISTS tsigkeys (
+  id                    INT AUTO_INCREMENT,
+  name                  VARCHAR(255),
+  algorithm             VARCHAR(50),
+  secret                VARCHAR(255),
+  PRIMARY KEY (id)
+) Engine=InnoDB;
+
+CREATE UNIQUE INDEX tsigkey_name_algorithm ON tsigkeys(name, algorithm);
+
+FLUSH PRIVILEGES;

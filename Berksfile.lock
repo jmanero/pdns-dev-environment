@@ -1,0 +1,9 @@
+DEPENDENCIES
+  apt
+  pdns
+    path: cookbook
+
+GRAPH
+  apt (2.4.0)
+  pdns (0.1.0)
+    apt (>= 0.0.0)
